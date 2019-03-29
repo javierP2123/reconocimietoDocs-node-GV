@@ -7,21 +7,22 @@ const util = require('util');
 var logger = require('morgan');
 var bodyParser = require('body-parser');
 var cors = require('cors');
-var analyzeRouteRest = require('./routes/analyzeDocs');
 const fileUpload = require('express-fileupload');
+
+var apiRouter = require('./src/routes/api');
 
 var app = express();
 app.options('*', cors());
 
-var log_file = fs.createWriteStream('./logs/node'+Date.now+'.log', {
-  flags: 'w'
-});
-var log_stdout = process.stdout;
+// var log_file = fs.createWriteStream('./logs/node'+Date.now+'.log', {
+//   flags: 'w'
+// });
+// var log_stdout = process.stdout;
 
-console.log = function(d) { //
-  log_file.write(util.format(d) + '\n');
-  log_stdout.write(util.format(d) + '\n');
-};
+// console.log = function(d) { //
+//   log_file.write(util.format(d) + '\n');
+//   log_stdout.write(util.format(d) + '\n');
+// };
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -46,8 +47,7 @@ app.use(fileUpload());
 //   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
 //   next();
 // });
-
-app.use('/docsAnalyze', analyzeRouteRest);
+app.use('/api', apiRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

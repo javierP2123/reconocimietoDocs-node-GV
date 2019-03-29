@@ -7,12 +7,13 @@
 var app = require('../app');
 var debug = require('debug')('poc-identificacion-documento:server');
 var http = require('http');
-
+const config = require('config');
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '8081');
+var port = normalizePort(process.env.PORT || config.get('app.port'));
+console.log("App running on port: ",port);
 app.set('port', port);
 
 /**
