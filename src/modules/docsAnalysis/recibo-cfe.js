@@ -1,4 +1,6 @@
-let getInfoFromCfe = (datos, rostro) => {
+const sL = /\n/g;
+let getInfoFromCfe = (info, rostro) => {
+  let datos = info.replace(sL, ' '); //quitar los saltos de linea
   let cfeCompDom = /Suministrador de Servicios Básicos CFE/i.test(datos);
   let cfeCompDom1 = /CFE Suministrador de Servicios Básicos/i.test(datos);
   let cfeCompDom2 = /CFE Suministrador de Servlclos Báslcos/i.test(datos);

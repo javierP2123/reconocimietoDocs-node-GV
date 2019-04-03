@@ -1,4 +1,8 @@
-let getInfoFromFormMigMX = (datos, rostro) => {
+const sL = /\n/g;
+
+let getInfoFromFormMigMX = (info, rostro) => {
+  var datos = info.replace(sL, ' ');//quitar los saltos de linea
+
   let formMigraComp = /FORMA MIGRATORIA/i.test(datos);
   let pasapCompMEX = /Estados Unidos Mexicanos/i.test(datos);
 

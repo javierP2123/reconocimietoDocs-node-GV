@@ -5,12 +5,12 @@ var axtel = require('./docsAnalysis/recibo-axtel.js');
 var passMx = require('./docsAnalysis/pasaporte-mx.js');
 var formMigrtMx = require('./docsAnalysis/form-migrt-mx.js');
 var dni = require('./docsAnalysis/DNI.js');
-// var licDeCondCdmxs = require('./docsAnalysis/licencia-manejo-cdmx.js');
+var licDeCondCdmxs = require('./docsAnalysis/licencia-manejo-cdmx.js');
 
-function getInfoDeDocumento(datos, rostro) {
-  console.log('====================datos para analizar=====');
-  console.log(datos);
-  console.log('=============================================');
+async function getInfoDeDocumento(datos, rostro) {
+  // console.log('====================datos para analizar=====');
+  // console.log(datos);
+  // console.log('=============================================');
 
   //regresa false si no es el documento, regresa la info analizada si es el documento en cuestion
   let stsIne = ine.getInfoFromIne(datos, rostro);
@@ -20,7 +20,7 @@ function getInfoDeDocumento(datos, rostro) {
   let stsPassMx = passMx.getInfoFromPasspMX(datos, rostro);
   let stsFormMigrtMx = formMigrtMx.getInfoFromFormMigMX(datos, rostro);
   let stsDni = dni.getInfoFromDni(datos, rostro);
-  // let stsLicDeCondCmdx = licDeCondCdmxs.getInfoFromLicDeCondCdmx(datos, rostro);
+  let stsLicDeCondCmdx = licDeCondCdmxs.getInfoFromLicDeCondCdmx(datos, rostro);
 
   if (stsIne != false) return stsIne;
   if (stsCfe != false) return stsCfe;
@@ -29,7 +29,7 @@ function getInfoDeDocumento(datos, rostro) {
   if (stsPassMx != false) return stsPassMx;
   if (stsFormMigrtMx != false) return stsFormMigrtMx;
   if (stsDni != false) return stsDni;
-  // if (stsLicDeCondCmdx != false) return stsLicDeCondCmdx;
+  if (stsLicDeCondCmdx != false) return stsLicDeCondCmdx;
 
   return getInfoFromUnkn(datos); //si ningun documento es reconocido se envia vacio
 }

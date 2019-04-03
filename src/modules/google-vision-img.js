@@ -10,24 +10,58 @@ module.exports.analisisVisionDoc = async function(archivo, mime, nombreBucket, a
   var rostro, facedetection, rostroDetectado, resultado;
 
   let request = './docs/docsReceived/' + archivo;
-  
-  const [result] = await client.documentTextDetection(request);
-  const fullTextAnnotation = result.fullTextAnnotation;
-  const respVision = fullTextAnnotation.text;
-  var re = /\n/g;
-  resultado = respVision.replace(re, ' ');
 
-  facedetection = await client.faceDetection(request);
-  rostroDetectado = facedetection[0].faceAnnotations[0].detectionConfidence;
-  if (rostroDetectado > 0.90) {
-    rostro = true;
-    console.log('Rostro detectado, confianza: ' + rostroDetectado);
-  } else {
-    console.log('rostro no detectado, o imagen con poca calidad');
-    rostro = false;
-  }
+  // const [result] = await client.documentTextDetection(request);
+  // const fullTextAnnotation = result.fullTextAnnotation;
+  // const respVision = fullTextAnnotation.text;
+  // console.log('=============full text annotation===============');
+  // console.log(fullTextAnnotation.text); //este metodo si medio reconoce algo lo pone como caracter aunque no lo sea, no es muy confiable a menos que se le meta logica avanzada(o mas tiempo jaja)
+  // console.log('===========================================');
 
-  let infoDeDocumento = getInfoDeDocumento.getInfoDeDocumento(resultado, rostro); //identificar el tipo de doc
+
+
+  // fullTextAnnotation.pages.forEach(page => {
+  //   page.blocks.forEach(block => {
+  //     block.paragraphs.forEach(paragraph => {
+  //       paragraph.words.forEach(word => {
+  //         if (word.confidence > 0.90) {
+  //           const wordText = word.symbols.map(s => s.text).join('');
+  //           // console.log(`Word text: ${wordText}`);
+  //           // console.log(`Word confidence: ${word.confidence}`);
+  //           resultado = resultado.concat(' '+wordText);
+  //           // word.symbols.forEach(symbol => {
+  //           //   console.log(`Symbol text: ${symbol.text}`);
+  //           //   console.log(`Symbol confidence: ${symbol.confidence}`);
+  //           // });
+  //           console.log(resultado);
+  //         }
+  //       });
+  //     });
+  //   });
+  // });
+
+
+
+  const [resultados] = await client.textDetection(request);
+  const detections = resultados.textAnnotations;
+  // console.log('===============text detection===============');
+  // console.log(detections[0].description);
+  // console.log('======================================');
+  const respVision = detections[0].description;
+
+  // facedetection = await client.faceDetection(request);
+  // rostroDetectado = facedetection[0].faceAnnotations[0].detectionConfidence;
+  // if (rostroDetectado > 0.90) {
+  //   rostro = true;
+  //   console.log('Rostro detectado, confianza: ' + rostroDetectado);
+  // } else {
+  //   console.log('rostro no detectado, o imagen con poca calidad');
+  //   rostro = false;
+  // }
+  rostro = true; //prueba
+
+  let infoDeDocumento = await getInfoDeDocumento.getInfoDeDocumento(respVision, rostro); //identificar el tipo de doc
+
   let idDoc = infoDeDocumento.idTypeDoc;
   let tipoDeDocumento = infoDeDocumento.wichOne;
 
@@ -42,48 +76,3 @@ module.exports.analisisVisionDoc = async function(archivo, mime, nombreBucket, a
   arrayDocType.data.push(docOjb);
   callback(arrayDocType);
 }
-
-
-// let gcsSourceUri = `gs://${bucketName}/${archivo}`;
-
-// const request = {
-//   image: {
-//     source: {
-//       imageUri: gcsSourceUri
-//     }
-//   }
-// };
-
-// client
-//   .textDetection(request)
-//   .then(response => {
-//     if (response[0].fullTextAnnotation == null) {
-//       var respVision = '';
-//     }else{
-//       var respVision = response[0].fullTextAnnotation.text;
-//     }
-//     var re = /\n/g;
-//     var resultado = respVision.replace(re, ' ');
-//
-//     let infoDeDocumento = getInfoDeDocumento.getInfoDeDocumento(resultado); //identificar el tipo de doc
-//     let idDoc = infoDeDocumento.idTypeDoc;
-//     let tipoDeDocumento = infoDeDocumento.wichOne;
-//
-//
-//     let docOjb = {
-//       idTypeDoc: idDoc,
-//       typeDoc: tipoDeDocumento,
-//       dataDoc: respVision,
-//       dataAnalized: infoDeDocumento
-//     };
-//
-//     docOjb.numDoc = 1;
-//     arrayDocType.data.push(docOjb);
-//
-//     callback(arrayDocType);
-//
-//   })
-//   .catch(err => {
-//     console.error(err);
-//     return false;
-//   });

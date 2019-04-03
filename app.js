@@ -14,11 +14,11 @@ var apiRouter = require('./src/routes/api');
 var app = express();
 app.options('*', cors());
 
-// var log_file = fs.createWriteStream('./logs/node'+Date.now+'.log', {
+// var log_file = fs.createWriteStream('./logs/node'+Date.now()+'.log', {
 //   flags: 'w'
 // });
 // var log_stdout = process.stdout;
-
+//
 // console.log = function(d) { //
 //   log_file.write(util.format(d) + '\n');
 //   log_stdout.write(util.format(d) + '\n');
@@ -30,7 +30,6 @@ app.set('view engine', 'jade');
 
 app.use(logger('dev'));
 app.use(express.json());
-// app.use(express.urlencoded({ extended: false }));
 app.use(bodyParser.urlencoded({
   extended: false
 }))

@@ -1,72 +1,98 @@
-let getInfoFromLicDeCondCdmx = (datos, rostro) => {
-  let paramIne = /INSTITUTO NACIONAL ELECTORAL/i;
-  let paramIne1 = /CREDENCIAL PARA VOTAR/i;
-  let ine = paramIne.test(datos);
-  let ine1 = paramIne1.test(datos);
+const exprNaci = /NAC[I1l][O0]NALIDAD/i;
+const expAntg = /ANT[I1]G[UÜ]EDAD/i;
+const expLicCond = /L[I1l]CENC[I1l]A\sDE\sC[O0]NDUC[I1l]R/i;
+const expLicCond1 = /L[I1l]CENC[I1l]A\sPARA\sC[O0]NDUC[I1l]R/i;
+const expExped = /EXPED[I1l]C[I1l][OÓ]n/i;
+const expLic = /L[I1l]CENC[I1l]A/i;
+const expNombre = /([A-Z]{2,20}\s){2,5}/;
+const expRfc = /RFC/i;
+const expCdmx = /CDMX/i;
+const sL = /\n/g;
 
-  if ((ine == true && rostro == true) || (ine1 == true && rostro == true)) {
-    let exprCp = /\d{5}/;
-    let expFecha = /(\d{2}[/|-]\d{2}[/|-]\d{4})/i;
-    //extraccion de datos de una ine nacional (no extranjera)
-    let posNombre = datos.indexOf('NOMBRE');
-    let posClave = datos.indexOf('CLAVE DE ELECTOR');
 
-    let datosRep = datos.slice(posNombre + 7, posClave);
-    console.log('====================datos para analizar=====');
-    console.log(datosRep);
-    console.log('=============================================');
+let getInfoFromLicDeCondCdmx = (info, rostro) => {
+  var datos = info.replace(sL, ' '); //quitar los saltos de linea
+  let licCond = expLicCond.test(datos);
+  let licCond1 = expLicCond1.test(datos);
 
-    let posFecha = datosRep.indexOf('FECHA DE NACIMIENTO');
-    let posDomi = datosRep.indexOf('DOMICILIO');
-    let posCol = datosRep.indexOf('COL');
-    let codPost = datosRep.match(exprCp);
-    let posCp = datosRep.indexOf(codPost[0]);
+  if ((licCond == true && rostro == true)) {
 
-    if (posFecha < 15) {
-      let nom1 = datosRep.slice(0, posFecha - 1);
-      let nom2 = datosRep.slice(posFecha + 30, posDomi);
-      var nombre = nom1 + nom2;
-      let dom0 = datosRep.slice(posDomi + 10, posCp);
-      let dom1 = datosRep.slice(posCp + 5, datosRep.length - 1);
-      var domicilio = dom0 + dom1;
-      var nombreArr = nombre.split(' ');
-      var secondname = (nombreArr => {
-        if (nombreArr[3]) return nombreArr[3];
-        else return '';
-      });
-    } else {
-      let fechaNum = datosRep.match(expFecha);
-      let posFechaNum = datosRep.indexOf(fechaNum[0]);
-      var nombre = datosRep.slice(0, posDomi);
-      var nombreArr = nombre.split(' ');
-      let dom0 = datosRep.slice(posDomi + 10, posFecha);
-      let dom1 = datosRep.slice(posFechaNum + 10, posCp);
-      let dom2 = datosRep.slice(posCp + 5, datosRep.length - 1);
-      var domicilio = dom0 + dom1 + dom2;
-      var secondname = (nombreArr => {
-        if (nombreArr[3]) return nombreArr[3];
-        else return '';
-      });
-    }
+    let arrLice = datos.match(expLic);
+    let posLice = datos.indexOf(arrLice[0]);
+
+    let arrAntg = datos.match(expAntg);
+    let posAntg = datos.indexOf(arrAntg[0]);
+
+    let datosRep0 = datos.slice(posLice + 9, posAntg);
+    arrLice = datosRep0.match(expLic);
+    posLice = datosRep0.indexOf(arrLice[0]);
+    let datosRep1 = datosRep0.slice(posLice, datosRep0.length - 1);
+
+    let extractName = datosRep1.match(expNombre);
+    let nombre = extractName[0].split(' ');
+    nombre.pop(nombre.length - 1);
+
+    var secondname = (nombreArr => {
+      if (nombreArr[3]) return nombreArr[1];
+      else return '';
+    });
 
     let datosDoc = {
       idTypeDoc: 1,
       nombre: {
-        fullName: nombre,
-        ape1: nombreArr[0],
-        ape2: nombreArr[1],
-        name1: nombreArr[2],
-        name2: secondname(nombreArr)
+        fullName: extractName[0],
+        ape1: nombre[nombre.length - 2],
+        ape2: nombre[nombre.length - 1],
+        name1: nombre[0],
+        name2: secondname(nombre)
       },
-      domicilio: domicilio,
-      cp: codPost[0],
-      wichOne: 'INE',
+      domicilio: '',
+      cp: '',
+      wichOne: 'Licencia de conducir',
       typeDoc: 'identificación personal',
       faceDetected: rostro
     };
     return datosDoc;
   } else {
-    return false;
+    if ((licCond1 == true && rostro == true)) {
+      let arrRfc = datos.match(expRfc);
+      let posRfc = datos.indexOf(arrRfc[0]);
+
+      let datosRep0 = datos.slice(posRfc + 9, datos.length - 1);
+
+      let arrCdmx = datosRep0.match(expCdmx);
+      let posCdmx = datosRep0.indexOf(arrCdmx[0]);
+
+      let datosRep1 = datosRep0.slice(0, posCdmx);
+
+      let extractName = datosRep1.match(expNombre);
+      let nombre = extractName[0].split(' ');
+      nombre.pop(nombre.length - 1);
+
+      var secondname = (nombreArr => {
+        if (nombreArr[3]) return nombreArr[1];
+        else return '';
+      });
+
+      let datosDoc = {
+        idTypeDoc: 1,
+        nombre: {
+          fullName: extractName[0],
+          ape1: nombre[nombre.length - 2],
+          ape2: nombre[nombre.length - 1],
+          name1: nombre[0],
+          name2: secondname(nombre)
+        },
+        domicilio: '',
+        cp: '',
+        wichOne: 'Licencia de conducir',
+        typeDoc: 'identificación personal',
+        faceDetected: rostro
+      };
+      return datosDoc;
+    } else {
+      return false;
+    }
   }
 }
 

@@ -1,4 +1,6 @@
-let getInfoFromAxt = (datos, rostro) => {
+const sL = /\n/g;
+let getInfoFromAxt = (info, rostro) => {
+  var datos = info.replace(sL, ' '); //quitar los saltos de linea
   let axtelComp = /axtel/i.test(datos);
 
   if (axtelComp == true) {

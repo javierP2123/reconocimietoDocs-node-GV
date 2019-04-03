@@ -9,8 +9,6 @@ const visionPDF = require('./google-vision-pdf.js');
 var getInfoDeDocumento = require('./analisis-info.js');
 var deleteFile = require('../services/deleteFiles.js');
 
-
-
 const nombreBucket = config.get('google.bucketName');
 
 let numKeys;
@@ -36,7 +34,7 @@ let analyze = (req, res) => { //se pasa el archivo a la peticion post
       let nombreDoc = fileObj[item].name;
       let typeMime = fileObj[item].mimetype;
       let datos = fileObj[item].data;
-      arrNames.push(nombreDoc);
+      // arrNames.push(nombreDoc);
 
       fs.writeFile('./docs/docsReceived/' + nombreDoc, datos, (err) => { //se guarda el archivo en el server
         if (err) throw err;
@@ -75,13 +73,10 @@ let analyze = (req, res) => { //se pasa el archivo a la peticion post
   }
 };
 
-
 // http://servidorcmc.sytes.net:8081
 // http://localhost:8081
 
 module.exports.analyze = analyze;
-
-
 
 var objVacio = {
   data: [{
