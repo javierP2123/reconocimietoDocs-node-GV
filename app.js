@@ -14,15 +14,15 @@ var apiRouter = require('./src/routes/api');
 var app = express();
 app.options('*', cors());
 
-// var log_file = fs.createWriteStream('./logs/node'+Date.now()+'.log', {
-//   flags: 'w'
-// });
-// var log_stdout = process.stdout;
-//
-// console.log = function(d) { //
-//   log_file.write(util.format(d) + '\n');
-//   log_stdout.write(util.format(d) + '\n');
-// };
+var log_file = fs.createWriteStream('./logs/node' + Date.now() + '.log', {
+  flags: 'w'
+});
+var log_stdout = process.stdout;
+
+console.log = function(d) { //
+  log_file.write(util.format(d) + '\n');
+  log_stdout.write(util.format(d) + '\n');
+};
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -65,10 +65,6 @@ app.use(function(err, req, res, next) {
 });
 
 module.exports = app;
-
-
-
-
 
 /*
 instalar google cloud platform e iniciar sesion

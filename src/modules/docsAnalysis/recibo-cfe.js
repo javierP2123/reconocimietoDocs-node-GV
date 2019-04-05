@@ -1,53 +1,67 @@
-const sL = /\n/g;
-let getInfoFromCfe = (info, rostro) => {
-  let datos = info.replace(sL, ' '); //quitar los saltos de linea
-  let cfeCompDom = /Suministrador de Servicios Básicos CFE/i.test(datos);
-  let cfeCompDom1 = /CFE Suministrador de Servicios Básicos/i.test(datos);
-  let cfeCompDom2 = /CFE Suministrador de Servlclos Báslcos/i.test(datos);
+const sL = /\n/g,
+  exp1 = /Sum[I1l]n[I1l]strad[O0]r\sde\sServ[I1l]c[I1l][O0]s\sB[aá]s[I1l]c[O0]s\sCFE/ig,
+  exp2 = /CFE\sSum[I1l]n[I1l]strador\sde\sServ[I1l]c[I1l]os\sB[aá]s[I1l]cos/ig,
+  expTotal = /T[O0]TAL\sA\sPAGAR/ig,
+  expTotal1 = /T[O0]TAL/ig,
+  expPerFact = /PER[I1l][O0]D[O0]\sFACTURAD[O0]/ig,
+  expRfc = /RFC/ig,
+  exprCpNum = /\d{5}/g,
+  exprCp = /C\.?P\.?/ig,
+  expInfImp = /([A-Z]{2,20}\s){2,5}/g,
+  expMn = /M\.?N\.?/g,
+  exprCp1 = /C\.?P\.?/i;
 
 
-  if (cfeCompDom == true || cfeCompDom1 == true || cfeCompDom2 == true) {
-    let exprCp = /\d{5}/;
-    let exprCp1 = /[C.P.|CP]/i;
+let getInfoFromCfe = async function(datos, rostro) {
+  var cfeCompDom, cfeCompDom1, cfeCompDom2, posRfc, posNoServi, datosRep,
+    posTotal, arrPeriFac, datosRep1, aux, nombre, direccion, direccion0, direccion1, direccion2,direccion3,
+    direccion3, nombreArr, arrInfoLimp;
+  // let datos = info.replace(sL, ' '); //quitar los saltos de linea
 
-    var posRfc = datos.indexOf('RFC:');
-    var posNoServi = datos.indexOf('NO. DE SERVICIO');
-    var datosRep = datos.slice(posRfc + 17, posNoServi);
-    var posTotal = datosRep.indexOf('TOTAL');
-    // var datosRep1 = datosRep.slice(0, sposTotal - 1);
-    // let exprPass = /([A-Z]{2,15})\s(\d{2})\s([A-Z]{2,15})\s([A-Z]{2,15})/;
-    let exprPass = /[A-Z]{2,15}\s[\d{2}|[A-Z]{2,15}]?\s[A-Z]{2,15}\s[A-Z]{2,15}/;
-    // let expMon = /d{2}\/d{3}\sM.N/i;
-    var passN = datosRep.match(exprPass);
-    var posName = datosRep.indexOf(passN[0]);
-    var nombre = passN[0];
-    var nombreArr = nombre.split(' ');
-    var datosRep1 = datosRep.slice(posName, datosRep.length - 1);
-    var posMN = datosRep1.indexOf('M.N');
-    var posTotal = datosRep1.indexOf('TOTAL');
-    var codPost = datosRep1.match(exprCp);
-    var posCp = datosRep1.indexOf(codPost[0]);
-    var codPost1 = datosRep1.match(exprCp1);
-    var posCp1 = datosRep1.indexOf(codPost1[0]);
+  cfeCompDom = exp1.test(datos);
+  cfeCompDom1 = exp2.test(datos);
 
-    if (posTotal > 0) {
-      let lastInDNam = datosRep1.lastIndexOf(nombreArr[3]);
+  if (cfeCompDom == true || cfeCompDom1 == true) {
 
-      let dir1 = datosRep1.slice(lastInDNam, posCp1);
-      let dir2 = datosRep1.slice(posMN + 4, datosRep1.length - 1);
-      var direccion = dir1 + dir2;
-    } else {
-      let lastInDNam = datosRep1.lastIndexOf(nombre);
-      // let datosRep2 = datosRep.slice(0, posTotal - 1);
-      let dir1 = datosRep1.slice(lastInDNam, posCp1 - 1);
-      let cash = datosRep1.indexOf('$');
-      let dir2 = datosRep1.slice(posCp + 5, cash);
-      var direccion = dir1 + dir2;
+    arrRfc1 = datos.match(expRfc);
+    posRfc1 = datos.indexOf(arrRfc1[0]);
+
+    arrPeriFac = datos.match(expPerFact);
+    posPerifac = datos.indexOf(arrPeriFac[0]);
+
+    arrMn = datos.match(expMn);
+    posMn = datos.indexOf(arrMn[0]);
+
+    datosRep = datos.slice(posRfc1, posMn);
+    console.log('========datos rep==============');
+    console.log(datosRep);
+    console.log('======================');
+    arrRfc1 = datosRep.split(sL);
+    aux = arrRfc1[0].length;
+    arrInfoLimp = await limpiarArr(arrRfc1);
+    console.log('========datos rep==============');
+    console.log(arrInfoLimp);
+    console.log('======================');
+
+    nombre = arrInfoLimp[0];
+    if(arrInfoLimp.length>2){
+      direccion1 = arrInfoLimp[1];
+      direccion2 = arrInfoLimp[2];
+      direccion3 = arrInfoLimp[3];
+      direccion = direccion1+' '+direccion2+' '+direccion3;
+    }else{
+      direccion = arrInfoLimp[1];
     }
-    var secondname = (nombreArr => {
+    nombreArr = nombre.split(' ');
+    var codPost0 = direccion.match(exprCp);
+    var posCp0 = direccion.indexOf(codPost0[0]);
+    var codPost = direccion.match(exprCpNum);
+    var posCp = datosRep.indexOf(codPost[0]);
+
+    var secondname = (nombreArr) => {
       if (nombreArr[3]) return nombreArr[3];
       else return '';
-    });
+    };
 
     let datosDoc = {
       idTypeDoc: 2,
@@ -68,8 +82,17 @@ let getInfoFromCfe = (info, rostro) => {
   } else {
     return false;
   }
-
-
 }
 
+function limpiarArr(arr) {
+  let arrLimp = [];
+  for (var i = 0; i < arr.length; i++) {
+    if (arr[i].includes('TOTAL') || arr[i].includes('RFC') || arr[i].includes('(') || arr[i].includes('$')) {
+      arr[i] = '';
+    } else {
+      arrLimp.push(arr[i]);
+    }
+  }
+  return arrLimp;
+}
 module.exports.getInfoFromCfe = getInfoFromCfe;

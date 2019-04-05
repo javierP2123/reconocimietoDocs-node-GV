@@ -6,6 +6,10 @@ var passMx = require('./docsAnalysis/pasaporte-mx.js');
 var formMigrtMx = require('./docsAnalysis/form-migrt-mx.js');
 var dni = require('./docsAnalysis/DNI.js');
 var licDeCondCdmxs = require('./docsAnalysis/licencia-manejo-cdmx.js');
+var reciboAguaCdmx = require('./docsAnalysis/recibo-agua-cdmx.js');
+var reciboPredialCdmx = require('./docsAnalysis/recibo-predial-cdmx.js');
+
+
 
 async function getInfoDeDocumento(datos, rostro) {
   // console.log('====================datos para analizar=====');
@@ -14,13 +18,15 @@ async function getInfoDeDocumento(datos, rostro) {
 
   //regresa false si no es el documento, regresa la info analizada si es el documento en cuestion
   let stsIne = ine.getInfoFromIne(datos, rostro);
-  let stsCfe = cfe.getInfoFromCfe(datos, rostro);
+  let stsCfe = await cfe.getInfoFromCfe(datos, rostro);//funcion asincona, esperar hasta que termine
   let stsTelmex = telmex.getInfoFromTelmx(datos, rostro);
   let stsAxtel = axtel.getInfoFromAxt(datos, rostro);
   let stsPassMx = passMx.getInfoFromPasspMX(datos, rostro);
   let stsFormMigrtMx = formMigrtMx.getInfoFromFormMigMX(datos, rostro);
   let stsDni = dni.getInfoFromDni(datos, rostro);
   let stsLicDeCondCmdx = licDeCondCdmxs.getInfoFromLicDeCondCdmx(datos, rostro);
+  let stsRecibPredialCmdx = await reciboPredialCdmx.getInfoFromRecibPredialCdmx(datos, rostro);//funcion asincona, esperar hasta que termine
+  let stsRecibAguaCmdx = await reciboAguaCdmx.getInfoFromRecibAguaCdmx(datos, rostro);
 
   if (stsIne != false) return stsIne;
   if (stsCfe != false) return stsCfe;
@@ -30,13 +36,15 @@ async function getInfoDeDocumento(datos, rostro) {
   if (stsFormMigrtMx != false) return stsFormMigrtMx;
   if (stsDni != false) return stsDni;
   if (stsLicDeCondCmdx != false) return stsLicDeCondCmdx;
+  if (stsRecibPredialCmdx != false) return stsRecibPredialCmdx;
+  if (stsRecibAguaCmdx != false) return stsRecibAguaCmdx;
 
-  return getInfoFromUnkn(datos); //si ningun documento es reconocido se envia vacio
+  return getInfoFromUnkn(); //si ningun documento es reconocido se envia vacio
 }
 
 module.exports.getInfoDeDocumento = getInfoDeDocumento;
 
-function getInfoFromUnkn(datos) {
+function getInfoFromUnkn() {
   let datosVacios = {
     idTypeDoc: 0,
     nombre: {
